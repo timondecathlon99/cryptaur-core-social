@@ -46,7 +46,7 @@ class Member extends Unit{
 		if(unserialize($this->showField('photo'))[0] != ''){
 			return unserialize($this->showField('photo'))[0];
 		}else{
-			return 'https://openclipart.org/image/2400px/svg_to_png/247319/abstract-user-flat-3.png';	
+			return 'https://image.freepik.com/free-icon/male-user-shadow_318-34042.jpg';
 		}
 	}
   
@@ -72,6 +72,20 @@ class Member extends Unit{
 			return false;
 		}
 	}
+
+    public function canCreateRecord(){
+	    $group = new Group($this->group_id());
+	    $start_time = time() - 30*24*3600;
+        $sql = $this->pdo->prepare("SELECT COUNT(*) FROM database_records WHERE author='".$this->member_id()."' AND publ_time>'$start_time'");
+        $sql->execute();
+        $res = $sql->fetch();
+        if($group->showField('month_record_limit') > $res[0]){
+            return true;
+        }else{
+            return false;
+        }
+	}
+
   
 	public function is_online(){
 		if(time() - $this->showField('last_visit') < 60){
@@ -142,6 +156,22 @@ class Member extends Unit{
 			return false;
 		}
 	}
+
+    public function isSpicialist(){
+        if($this->showField('member_group_id') == 5){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function isExpert(){
+        if($this->showField('member_group_id') == 6){
+            return true;
+        }else{
+            return false;
+        }
+    }
 	
 	
 	
@@ -444,6 +474,66 @@ class Member extends Unit{
 			}
 		}
 	}
+
+	public function avatar()
+    {
+        return json_decode($this->showField('photo'));
+    }
+
+    public function changeAvatar($photo)
+    {
+
+            if(file_exists($_SERVER["DOCUMENT_ROOT"]. DOMAIN .$this->avatar())){
+                unlink($_SERVER["DOCUMENT_ROOT"]. DOMAIN .$this->avatar());
+            }
+            $file_sec_new_name = md5($_FILES['file']['name'].time()).'.jpg';
+            $uploadfile_sec = '/uploads/'.$file_sec_new_name;
+            echo $uploadfile_sec;
+            echo $_SERVER['DOCUMENT_ROOT'].$uploadfile_sec;
+            if(move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'].$uploadfile_sec)){
+                $photo = '/uploads/'.$file_sec_new_name;
+                $this->updateField('photo',json_encode($photo));
+                echo "Загрузили";
+            }else{
+                echo "не Загрузили";
+            }
+    }
+
+    public function getAllNewMessages(){
+        $sql = $this->pdo->prepare("SELECT * FROM messages WHERE to_id=:to_id  AND activity='1' AND was_read='0' ");
+        $sql->bindParam(':to_id', $this->member_id());
+        $sql->execute();
+        $units = $sql->fetchAll();
+        return $units;
+    }
+
+    public function canWriteFeedback(int $item_id){
+	    $sys = new System(0);
+	    $good_comment_cooldown_days = $sys->showField('good_comment_cooldown');
+	    $lim_time = time() - $good_comment_cooldown_days*24*3600;
+        $sql = $this->pdo->prepare("SELECT COUNT(*) FROM comments WHERE author=:member_id AND record_id=:item_id AND comment_group='2' AND publ_time>'$lim_time' ");
+        $sql->bindParam(':member_id', $this->member_id());
+        $sql->bindParam(':item_id', $item_id);
+        $sql->execute();
+        $res = $sql->fetch();
+        if($res[0] == 0  || $this->isAdmin() || $this->isExpert() || $this->isSpicialist()) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function boughtGoods(){
+        return json_decode($this->showField('bought_goods'));
+    }
+
+    public function hasBought(int $good_id){
+        if(in_array($good_id,$this->boughtGoods())){
+            return true;
+        }else{
+            return false;
+        }
+    }
   
 
 
@@ -456,6 +546,16 @@ class Member extends Unit{
     public function isSubscribed(int $user_id)
     {
         if(in_array($user_id,$this->friendsList())){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function isSubscriber(int $user_id)
+    {
+        $subscript_to = new Member($user_id);
+        if(in_array($subscript_to->member_id(),$this->friendsList())){
             return true;
         }else{
             return false;
@@ -489,8 +589,11 @@ class Member extends Unit{
             unset($friendsArray[array_search($user_id, $friendsArray)]);
             sort($friendsArray); //иначе при перегоне из json в массив будет косяк
             $friendsArray = json_encode($friendsArray);
-            $sql = $this->mysqli->prepare("UPDATE ".$this->setTable()." SET friends='$friendsArray'  WHERE id='".$this->id."'");
-            $sql->execute();
+            $sql = $this->pdo->prepare("UPDATE ".$this->setTable()." SET friends='$friendsArray'  WHERE id='".$this->id."'");
+            if($sql->execute()){
+                $action = new Action(0);
+                $action->setUnsubscription($this->member_id(),$user_id);
+            }
         }
 
     }
@@ -504,8 +607,11 @@ class Member extends Unit{
         if(!in_array($user_id,$friendsArray)){
             array_push($friendsArray, $user_id);
             $friendsArray = json_encode($friendsArray);
-            $sql = $this->mysqli->prepare("UPDATE ".$this->setTable()." SET friends='$friendsArray' WHERE id='".$this->id."' ");
-            $sql->execute();
+            $sql = $this->pdo->prepare("UPDATE ".$this->setTable()." SET friends='$friendsArray' WHERE id='".$this->id."' ");
+            if($sql->execute()){
+                $action = new Action(0);
+                $action->setSubscription($this->member_id(),$user_id);
+            }
         }
     }
 

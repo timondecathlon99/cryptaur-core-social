@@ -1,11 +1,12 @@
 <?php
 $hostname = 'http://socium.linkholder.ru';
-$domain = 'http://socium.linkholder.ru/';    
+$domain = 'http://socium.linkholder.ru/';
 define("DOMAIN", "/");
+define("PHOTO_FOLDER", 'uploads');
 
 $host = 'localhost';
 $user ='sonic';
-$password ='';
+$password ='20091993decSonic-tgogogo';
 $db = 'cryptaur_socium';  
 
 

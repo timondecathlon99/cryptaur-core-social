@@ -1,111 +1,153 @@
 <?
 class Record extends Unit{
-   
-   
-   public function setTable()
-   {
-	  return 'database_records';
-   }
-    
-   public function record_id()
-   {
-      return $this->showField('id');
-   }
-   
-   public function title()
-   {
-      return $this->showField('title');
-   }
+
+
+    public function setTable()
+    {
+        return 'database_records';
+    }
+
+    public function record_id()
+    {
+        return $this->showField('id');
+    }
+
+    public function refferTo()
+    {
+        return $this->showField('item_id');
+    }
+
+    public function isRefferTo()
+    {
+        if($this->refferTo()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+    public function title()
+    {
+        return $this->showField('title');
+    }
 
     public function preview()
     {
         return mb_strimwidth(strip_tags($this->description()), 0, 400, "...");
     }
 
+    public function category()
+    {
+        return $this->showField('category');
+    }
+
     public function description()
     {
-      return $this->showField('description');
+        return $this->showField('description');
     }
-   
+
+    public function photos(){
+        return json_decode($this->showField('photo'));
+    }
+
     public function photo()
     {
-      return unserialize($this->showField('photo'))[0];
+        return $this->photos()[0];
     }
-   
-   public function thumb()
-   {
-      return unserialize($this->showField('thumbs'))[0];
-   }
-   
-   public function photo_cover()
-   {
-      return $this->showField('photo_small');
-   }
-   
-   public function thumb_cover(){
-      return $this->showField('thumb_small');
-   }
-   
-   public function furl()
-   {
-      return $this->showField('furl'); 
-   }
-   
-   public function publ_time(){
-	  return date_format_rus($this->showField('publ_time'));
-   }
 
-   public function meta_title(){
-	  if($this->showField('content_title')){
-	    return $this->showField('content_title');
-	  }else{
-	    return $this->showField('title');
-	  }
-   }
+    public function thumb()
+    {
+        return json_decode($this->showField('thumbs'))[0];
+    }
 
-   public function meta_keywords()
-   {
-      if($this->showField('content_keywords')){
-	    return $this->showField('content_keywords');
-	  }else{
-	    return $this->showField('title');
-	  }
-   }
+    public function photo_cover()
+    {
+        return $this->showField('photo_small');
+    }
 
-   public function meta_description()
-   {
-      if($this->showField('content_description')){
-	    return $this->showField('content_description');
-	  }else{
-	    return $this->showField('title');
-	  }
-   }
-     
-   public function meta_icon()
-   {
-      return unserialize($this->showField('photo'))[0];
-   }
+    public function thumb_cover(){
+        return $this->showField('thumb_small');
+    }
 
-    public function create(int $author_id){
+    public function furl()
+    {
+        return $this->showField('furl');
+    }
+
+    public function canSee()
+    {
+        $member = new Member($this->memberId());
+        $author = new Member($this->author());
+        /*If everyone can see*/
+        if($this->showField('record_can_see') == 1 || $this->author() == $member->member_id() || $member->isAdmin()){
+            return true;
+        }elseif($this->showField('record_can_see') == 2 ){
+            if($author->isFriend($member->member_id())){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+               return false;
+        }
+    }
+
+    public function author()
+    {
+        return $this->showField('author');
+    }
+
+    public function memberId()
+    {
+        $member = new Member($_COOKIE['member_id']);
+        return $member->member_id();
+    }
+
+    public function publ_time(){
+        return date_format_rus($this->showField('publ_time'));
+    }
+
+    public function meta_title(){
+        if($this->showField('content_title')){
+            return $this->showField('content_title');
+        }else{
+            return $this->showField('title');
+        }
+    }
+
+    public function meta_keywords()
+    {
+        if($this->showField('content_keywords')){
+            return $this->showField('content_keywords');
+        }else{
+            return $this->showField('title');
+        }
+    }
+
+    public function meta_description()
+    {
+        if($this->showField('content_description')){
+            return $this->showField('content_description');
+        }else{
+            return $this->showField('title');
+        }
+    }
+
+    public function meta_icon()
+    {
+        return unserialize($this->showField('photo'))[0];
+    }
+
+    public function create(){
         $line1 = '';
         $line2 = '';
         $publ_time = time();
-        $activity = 1;
-        $i =0;
         $arr_isset = array();
-        $par_arr = $this->getAllFields();
         //смотрим какие поля были получены
-        foreach($par_arr as $arr_item){
+        foreach($this->getTableColumnsNames() as $arr_item){
             if($_POST[$arr_item] != NULL){
-                if(is_array($_POST[$arr_item])){ //проверяем не массив ли это
-                    $arr_isset[$arr_item] = serialize($_POST[$arr_item]);
-                }else{
-                    if($arr_item == 'password'){
-                        $arr_isset[$arr_item] = crypt($_POST[$arr_item]); //криптуем пароль
-                    }else{
-                        $arr_isset[$arr_item] = $_POST[$arr_item];
-                    }
-                }
+                $arr_isset[$arr_item] = $_POST[$arr_item];
             }
         }
         //создаем строку полей и значений
@@ -114,49 +156,64 @@ class Record extends Unit{
             $line2 = $line2."'".addslashes($value)."'".', ';
         }
         $line1 = $line1.'author, publ_time';
-        $line2 = $line2.$author_id.",$publ_time";
-        $sql = $this->mysqli->prepare("INSERT INTO ".$this->setTable()."(".$line1.")"."VALUES(".$line2.")");
-        $sql->execute();
+        $line2 = $line2.$this->memberId().",$publ_time";
+        $sql = $this->pdo->prepare("INSERT INTO ".$this->setTable()."(".$line1.")"."VALUES(".$line2.")");
+        if($sql->execute()){
+            $action = new Action(0);
+            $action->setRecord($this->memberId(),$this->getMaxId());
+        }
     }
 
     public function delete(){
-        $author = new Member($_COOKIE['member_id']);
-        $sql = $this->mysqli->prepare("DELETE FROM ".$this->setTable()." WHERE id=? AND author=?   ");
-        $sql->bind_param('ii',$this->id, $author->member_id());
-        $sql->execute();
-        //return $author->member_id();
+        /* сейчас каждый может удалить тольк свое */
+        $member = new Member($this->memberId());
+        if($this->author() == $this->memberId() || $member->isAdmin()){
+            $sql = $this->pdo->prepare("DELETE FROM ".$this->setTable()." WHERE id=? AND author=?   ");
+            $sql->execute(array($this->id,$this->author()));
+        }
     }
-   
-    public function author()
+
+    public function isRepost()
     {
-        return $this->showField('author');
+        if($this->showField('original_id') != 0){
+            return true;
+        }else{
+            return false;
+        }
     }
+
+    public function canDelete(){
+
+
+    }
+
+    public function originalId()
+    {
+        return $this->showField('original_id');
+    }
+
 
     public function getLikes()
     {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        return json_decode($unit['likes']);
+        return json_decode($this->showField('likes'));
     }
 
     public function getDislikes()
     {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        return json_decode($unit['dislikes']);
+        return json_decode($this->showField('dislikes'));
     }
 
     public function getReposts()
     {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
+        return json_decode($this->showField('reposts'));
+    }
+
+
+     public function getComments(){
+        $sql = $this->pdo->prepare("SELECT * FROM comments WHERE comment_group='1' AND record_id=:id");
+        $sql->bindParam(':id',$this->id);
         $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        return json_decode($unit['reposts']);
+        return $sql->fetchAll();
     }
 
     public function getLikesAmount()
@@ -174,137 +231,148 @@ class Record extends Unit{
         return count($this->getReposts());
     }
 
-    public function setLike(int $id)
+    public function getCommentsAmount()
     {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        $likesArray =  json_decode($unit['likes']);
+        return count($this->getComments());
+    }
+
+    public function setLike()
+    {
+        $likesArray =  $this->getLikes();
         if($likesArray == NULL){
             $likesArray =  array();
         }
-        if(in_array($id, $likesArray)){
-            unset($likesArray[array_search((int)$id, $likesArray)]);
-            sort($friendsArray); //иначе при перегоне из json в массив будет косяк
+        if(in_array($this->memberId(), $likesArray)){
+            unset($likesArray[array_search($this->memberId(), $likesArray)]);
+            sort($likesArray); //иначе при перегоне из json в массив будет косяк
         }else{
-            array_push($likesArray,$id);
+            array_push($likesArray,$this->memberId());
         }
         $likesArray = json_encode($likesArray);
-        $sql = $this->mysqli->prepare("UPDATE ".$this->setTable()." SET likes='$likesArray' WHERE id='".$this->id."'");
-        $sql->execute();
+        $sql = $this->pdo->prepare("UPDATE ".$this->setTable()." SET likes='$likesArray' WHERE id='".$this->id."'");
+        if($sql->execute()){
+           /*----Create actions for activity wall -----*/
+           $activityAction = new Action(0);
+           $activityAction->setLike($this->memberId(),$this->record_id());
+
+           /*----Create BALANCE actions for BALANCE wall -----*/
+           if($this->isRefferTo()){
+               $balanceAction = new Balance(0);
+               $balanceAction->setBalanceLike($this->record_id());
+           }
+         }
+
     }
 
-    public function likedBy(int $id)
+    public function setDislike()
     {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        $likesArray =  json_decode($unit['likes']);
-        if(in_array($id, $likesArray)){
-            return true;
+        $dislikesArray =  $this->getDislikes();
+        if($dislikesArray == NULL){
+            $dislikesArray =  array();
+        }
+        if(in_array($this->memberId(),$dislikesArray)){
+            unset($dislikesArray[array_search($this->memberId(), $dislikesArray)]);
+            sort($dislikesArray); //иначе при перегоне из json в массив будет косяк
         }else{
-            return false;
+            array_push($dislikesArray,$this->memberId());
+        }
+        $dislikesArray = json_encode($dislikesArray);
+        $sql = $this->pdo->prepare("UPDATE ".$this->setTable()." SET dislikes='$dislikesArray' WHERE id='".$this->id."'");
+        if($sql->execute()){
+            /*----Create actions for activity wall -----*/
+            $activityAction = new Action(0);
+            $activityAction->setDislike($this->memberId(),$this->record_id());
+
+            /*----Create BALANCE actions for BALANCE wall -----*/
+            if($this->isRefferTo()){
+                $balanceAction = new Balance(0);
+                $balanceAction->setBalanceDislike($this->record_id());
+            }
         }
     }
 
-    public function dislikedBy(int $id)
+    public function setRepost()
     {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        $likesArray =  json_decode($unit['dislikes']);
-        if(in_array($id, $likesArray)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function repostedBy(int $id)
-    {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        $likesArray =  json_decode($unit['reposts']);
-        if(in_array($id, $likesArray)){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function setDislike(int $id)
-    {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        $likesArray =  json_decode($unit['dislikes']);
-        if($likesArray == NULL){
-            $likesArray =  array();
-        }
-        if(in_array($id,$likesArray)){
-            unset($likesArray[array_search((int)$id, $likesArray)]);
-            sort($friendsArray); //иначе при перегоне из json в массив будет косяк
-        }else{
-            array_push($likesArray,$id);
-        }
-        $likesArray = json_encode($likesArray);
-        $sql = $this->mysqli->prepare("UPDATE ".$this->setTable()." SET dislikes='$likesArray' WHERE id='".$this->id."'");
-        $sql->execute();
-    }
-
-    public function isRepost()
-    {
-        if($this->showField('original_id') != NULL){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    public function originalId()
-    {
-            return $this->showField('original_id');
-    }
-
-    public function setRepost(int $user_id)
-    {
-        $sql = $this->mysqli->prepare("SELECT * FROM ".$this->setTable()." WHERE id=?");
-        $sql->bind_param("i", $this->id);
-        $sql->execute();
-        $unit = $sql->get_result()->fetch_assoc();
-        $repostsArray =  json_decode($unit['reposts']);
+        $repostsArray =  $this->getReposts();
         if($repostsArray == NULL){
             $repostsArray =  array();
         }
-        if(in_array($user_id,$repostsArray)){
-            $sql = $this->mysqli->prepare("DELETE  FROM ".$this->setTable()." WHERE original_id=? AND author=? ");
-            $sql->bind_param("ii", $this->id, $user_id);
+        if(in_array($this->memberId(),$repostsArray)){
+            $sql = $this->pdo->prepare("DELETE  FROM ".$this->setTable()." WHERE original_id=:id AND author=:member_id ");
+            $sql->bindParam(":id", $this->id);
+            $sql->bindParam(":member_id", $this->memberId());
             $sql->execute();
-            unset($repostsArray[array_search($user_id, $repostsArray)]);
+            unset($repostsArray[array_search($this->memberId(), $repostsArray)]);
             sort($repostsArray); //иначе при перегоне из json в массив будет косяк
         }else{
             /* cмотрим если у статьи есть original_id  значит это репост  и надо брать id оригинала */
-            if($unit['original_id'] != NULL){
-                $original_id = $unit['original_id'];
+            if($this->originalId() != 0){
+                $original_id = $this->originalId();
             }else{
                 $original_id = $this->id;
             }
-            $sql = $this->mysqli->prepare("INSERT INTO ".$this->setTable()."(author, original_id, publ_time) VALUES('".$user_id."','".$original_id."', '".time()."') ");
+            $sql = $this->pdo->prepare("INSERT INTO ".$this->setTable()."(author, original_id, publ_time) VALUES('".$this->memberId()."','".$original_id."', '".time()."') ");
             $sql->execute();
-            array_push($repostsArray,$user_id);
+            array_push($repostsArray,$this->memberId());
         }
         $repostsArray = json_encode($repostsArray);
-        $sql = $this->mysqli->prepare("UPDATE ".$this->setTable()." SET reposts='$repostsArray' WHERE id='".$this->id."'");
-        $sql->execute();
+        $sql = $this->pdo->prepare("UPDATE ".$this->setTable()." SET reposts='$repostsArray' WHERE id='".$this->id."'");
+        if($sql->execute()){
+            /*----Create actions for activity wall -----*/
+            $activityAction = new Action(0);
+            $activityAction->setRepost($this->memberId(),$this->record_id());
+
+            /*----Create BALANCE actions for BALANCE wall -----*/
+            if($this->isRefferTo()){
+                $balanceAction = new Balance(0);
+                $balanceAction->setBalanceRepost($this->record_id());
+            }
+        }
+
     }
-   
-     
+
+    public function likedBy()
+    {
+        $likesArray =  $this->getLikes();
+        if(in_array($this->memberId(), $likesArray)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function dislikedBy()
+    {
+        $dislikesArray =  $this->getDislikes();
+        if(in_array($this->memberId(), $dislikesArray)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function repostedBy()
+    {
+        $repostsArray =  $this->getReposts();
+        if(in_array($this->memberId(), $repostsArray)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function commentedBy()
+    {
+        foreach($this->getComments() as $comment){
+            if(in_array($this->memberId(), $comment)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
+
+
 }
 
 

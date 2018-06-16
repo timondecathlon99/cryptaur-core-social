@@ -11,10 +11,10 @@ function my_autoloader($class) {
 spl_autoload_register('my_autoloader');
 
 $logedUser = new Member($_COOKIE['member_id']);
-if($logedUser->isSubscribed($_GET['friend_id'])){
-    $logedUser->friendDelete($_GET['friend_id']);
+if($logedUser->isSubscribed($_POST['friend_id'])){
+    $logedUser->friendDelete($_POST['friend_id']);
 }else{
-    $logedUser->friendAdd($_GET['friend_id']);
+    $logedUser->friendAdd($_POST['friend_id']);
 }
 
 header("Location: ".$_SERVER['HTTP_REFERER']);

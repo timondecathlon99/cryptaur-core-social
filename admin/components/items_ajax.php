@@ -6,7 +6,7 @@
    (isset($_GET['category'])) ?  $category = "%".$_GET['category']."%" : $category = "%%";
    (isset($_GET['articul'])) ? $articul = "%".$_GET['articul']."%" : $articul = "%%";
   
-   $source = $pdo->prepare("SELECT * FROM $table_items $active AND articul LIKE :articul AND type LIKE :type AND color LIKE :color AND collection LIKE :collection AND category LIKE :category ORDER BY id ASC");		
+   $source = $pdo->prepare("SELECT * FROM $table_items WHERE articul LIKE :articul AND type LIKE :type AND color LIKE :color AND collection LIKE :collection AND category LIKE :category ORDER BY id ASC");
    $source->bindParam(':articul', $articul);
    $source->bindParam(':color', $color);
    $source->bindParam(':type', $type);
@@ -20,7 +20,7 @@
               <tr> 
 			    <td><?=$i?></td>
 				<td><div class='item_preview' style=' background: url(<?=$domain.$photo[0]?>);'><a href='post_form.php?category=<?=$table_items?>&id=<?=$src['id']?>&action=change&title=изменить'></a><div><div class='item_preview_big'></div></td>
-			    <td><a href='post_form.php?category=<?=$table_items?>&id=<?=$src['id']?>&action=change&title=изменить'><b><?=$src['articul']?></b></a></td>
+			    <td><a href='post_form.php?category=<?=$table_items?>&id=<?=$src['id']?>&action=change&title=изменить'><b><?=$src['title']?></b></a></td>
 			    <td><?=$src['title']?></td>
 				<td><?=$src['color']?></td>
 				<td><?=$src['amount']?></td>

@@ -10,7 +10,6 @@ function my_autoloader($class) {
 }
 spl_autoload_register('my_autoloader');
 
-$member = new Member($_COOKIE['member_id']);
 $currRecord = new Record($_POST['record_id']);
 $currRecord->delete();
 

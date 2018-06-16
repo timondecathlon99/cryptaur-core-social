@@ -13,7 +13,7 @@
 			<th>Цвет</th>
 			<th>Остаток</th>
             <th>Цена</th>
-            <th>Коллекция</th>
+            <th>Категория</th>
           
 	<span id='curr_items'>	  
        <?include('items_row.php');?>  

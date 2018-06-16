@@ -23,7 +23,16 @@ $(window).load(function() {
 			    });
 			});
 
-  
 
+    $(document).ready(function(){
+        $('.action-comment').click(function() {
+            $(this).closest('.record-unit').find('.comment-form').show();
+
+        });
+
+        $('.comment-box').keyup(function() {
+            $(this).closest('form').find('.comment-panel').show();
+        });
+    });
 	
 	

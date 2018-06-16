@@ -11,7 +11,56 @@
 				 <button>Применить</button>
 				</form>
 			  </div>
-			</div>	  
+			</div>
+
+             <div class='desktop_form_unit'>
+                 <div class='unit_name'>Курс обмена баллы/СРТ</div>
+                 <div>
+                     <form action='components/change_media.php' method='POST'>
+                         <input name='new_val' disabled type='text'  value='<?=$media_src['rate_course'];?>'></input>
+                         <input type='hidden' name='name' value='rate_course'></input>
+                         <div class='change_media'><img src='img/change_media.png'/></div>
+                         <button>Применить</button>
+                     </form>
+                 </div>
+             </div>
+
+         <div class='desktop_form_unit'>
+             <div class='unit_name'>Срок годности баллов(дней)</div>
+             <div>
+                 <form action='components/change_media.php' method='POST'>
+                     <input name='new_val' disabled type='text'  value='<?=$media_src['points_lifetime'];?>'></input>
+                     <input type='hidden' name='name' value='points_lifetime'></input>
+                     <div class='change_media'><img src='img/change_media.png'/></div>
+                     <button>Применить</button>
+                 </form>
+             </div>
+         </div>
+
+         <div class='desktop_form_unit'>
+             <div class='unit_name'>Кулдаун отзыва к товару(дней)</div>
+             <div>
+                 <form action='components/change_media.php' method='POST'>
+                     <input name='new_val' disabled type='text'  value='<?=$media_src['good_comment_cooldown']?>'></input>
+                     <input type='hidden' name='name' value='good_comment_cooldown'></input>
+                     <div class='change_media'><img src='img/change_media.png'/></div>
+                     <button>Применить</button>
+                 </form>
+             </div>
+         </div>
+
+         <div class='desktop_form_unit'>
+             <div class='unit_name'>Цена участия в выборах(баллов)</div>
+             <div>
+                 <form action='components/change_media.php' method='POST'>
+                     <input name='new_val' disabled type='text'  value='<?echo $media_src['rate_course'];?>'></input>
+                     <input type='hidden' name='name' value='rate_course'></input>
+                     <div class='change_media'><img src='img/change_media.png'/></div>
+                     <button>Применить</button>
+                 </form>
+             </div>
+         </div>
+
 			
 			<div class='desktop_form_unit'>
 			  <div class='unit_name'><b>E-mail администратора</b></div>
@@ -195,75 +244,7 @@
 				</form>
 			  </div>
 			</div>
-			
-			<div class='desktop_form_unit'>
-			  <div class='unit_name'>Радиус поиска магазинов(км)</div>
-			  <div> 
-			    <form action='components/change_media.php' method='POST'>
-				 <input name='new_val' disabled type='number'  value='<?echo $media_src['radius'];?>'></input>
-				 <input type='hidden' name='name' value='radius'></input>
-				 <div class='change_media'><img src='img/change_media.png'/></div>
-				 <button>Применить</button>
-				</form>
-			  </div>
-			</div>
-			
-			<div class='desktop_form_unit'>
-			  <div class='unit_name'>Кулдаун рекламы(сек)</div>
-			  <div> 
-			    <form action='components/change_media.php' method='POST'>
-				 <input name='new_val' disabled type='number'  value='<?echo $media_src['ad_cooldown'];?>'></input>
-				 <input type='hidden' name='name' value='ad_cooldown'></input>
-				 <div class='change_media'><img src='img/change_media.png'/></div>
-				 <button>Применить</button>
-				</form>
-			  </div>
-			</div>
-			
-			<div class='desktop_form_unit'>
-			  <div class='unit_name'>Показывать PopUp окна (<b><? if($media_src['popup_activity'] == 1){echo "показываются";}else{ echo "не показываются";} ?></b>)</div>
-			  <div> 
-			    <form action='components/change_media.php' method='POST'>
-				 <select disabled name='new_val'>
-				   <option value='1'>Да</option>
-				   <option value='2'>Нет</option>
-				 </select>
-				 <input type='hidden' name='name' value='popup_activity'></input>
-				 <div class='change_media'><img src='img/change_media.png'/></div>
-				 <button>Применить</button>
-				</form>
-			  </div>
-			</div>
-			
-			<div class='desktop_form_unit'>
-			  <div class='unit_name'>Включить полноэкранный скроллинг на Главной (<b><? if($media_src['full_page_on'] == 1){echo "Включен";}else{ echo "Отключен";} ?></b>)</div>
-			  <div> 
-			    <form action='components/change_media.php' method='POST'>
-				 <select disabled name='new_val'>
-				   <option value='1'>Да</option>
-				   <option value='0'>Нет</option>
-				 </select>
-				 <input type='hidden' name='name' value='full_page_on'></input>
-				 <div class='change_media'><img src='img/change_media.png'/></div>
-				 <button>Применить</button>
-				</form>
-			  </div>
-			</div>
-			
-			<div class='desktop_form_unit'>
-			  <div class='unit_name'>Включить адаптивные картинки (<b><? if($media_src['responsive_imgs'] == 1){echo "включено";}else{ echo "отключено";} ?></b>)</div>
-			  <div> 
-			    <form action='components/change_media.php' method='POST'>
-				 <select disabled name='new_val'>
-				   <option value='1'>Да</option>
-				   <option value='0'>Нет</option>
-				 </select>
-				 <input type='hidden' name='name' value='responsive_imgs'></input>
-				 <div class='change_media'><img src='img/change_media.png'/></div>
-				 <button>Применить</button>
-				</form>
-			  </div>
-			</div>
+
 
 	  </div>  
   </div>

@@ -3,7 +3,7 @@
         <?php
         $actual_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
         $furl =parse_url($actual_link);
-        var_dump($furl);
+        //var_dump($furl);
         $page_template = explode('/',$furl['path'])[1];
         if($page_template == 'user'){
             if(explode('/',$furl['path'])[2] != NULL){
@@ -27,17 +27,22 @@
             <div>
                 <span><b><?=$pageUser->name()?></b></span><br><?=$pageUser->surName()?> <?=$pageUser->fatherName()?>
             </div>
-            <ul>
-                <li>Статус: <span><?=$pageUser->group_name()?></span></li>
-                <li>Баланс: <span><?=$pageUser->reputation_points()?></span></li>
-                <li>Коэф. лояльности: <span>7.7</span></li>
-            </ul>
-            <?if($pageUser->member_id() == $logedUser->member_id()){?>
-                <div class="user-actions">
+            <div>
+                <ul>
+                    <li>Статус: <span><?=$pageUser->group_name()?></span></li>
+                    <li>Баланс: <span><?=$pageUser->reputation_points()?></span></li>
+                    <li>Коэф. лояльности: <span>7.7</span></li>
+                </ul>
+            </div>
+            <div class="user-actions">
+                <?if($pageUser->member_id() == $logedUser->member_id()){?>
                     <a href="#">Редактитровать</a>
                     <a href="#">Выход</a>
-                </div>
-            <? }?>
+                <?}else{?>
+                    <a href="#">Написать</a>
+                    <a href="#">Добавить в лрузья</a>
+                <?}?>
+            </div>
         </div>
     </div>
     <div class="user-menu">

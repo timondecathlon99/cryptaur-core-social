@@ -10,9 +10,7 @@ function my_autoloader($class) {
 }
 spl_autoload_register('my_autoloader');
 
-$logedUser = new Member($_COOKIE['member_id']);
 $currRecord = new Record($_GET['record_id']);
-$currRecord->setRepost($logedUser->member_id());
-
+$currRecord->setRepost();
 
 header("Location: ".$_SERVER['HTTP_REFERER']);

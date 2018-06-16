@@ -1,143 +1,45 @@
 <?
 
-include('../components/header.php');
-include('../components/menu_top.php')
+include_once(__DIR__ . '/../global_pass.php');
+include_once(__DIR__ . '/../classes/autoload.php');
+$theme = new Theme($media_src['theme']);
+$logedUser = new Member($_COOKIE['member_id']);
+if($logedUser->member_id() > 0){
+    header("Location: ".$domain.'feed/');
+}else{
+
+}
 ?>
-<script>
-$(document).ready(function() {
-
-$('.login_form form button').attr("disabled", true);
-$('.login_form form button').css("opacity","0.5");
-var password_tip, login_tip, email_tip = 0; 
-var passVal = '';
-var checkPassVal ='';
-var name = $('#userLogin');
-var email = $('#userEmail');
-
-
-////////////Проверка паролей///////////////////////////////////////
- $('#passCheck, #userPass').keyup(function() {
-  passVal = $('#userPass').val();
-  confirmPassVal = $('#passCheck').val();
-  //alert(passVal);
-  //alert(confirmPassVal);
-  confirmPass = $('#passCheck');
-  $.ajax({
-                        url: "<?=$domain?>/modules/registration/check/password/",
-                        type: "POST",
-                        data: {"password": passVal, "confirm": confirmPassVal},
-                        cache: false,
-                        success: function(response){
-                            if(response == true){ 
-							 $(confirmPass).closest('div').find('div').html('');
-							 password_tip = 1;
-                            }else{
-						     $(confirmPass).closest('div').find('div').html('Пароли не совпадают');
-                             password_tip = 0;	
-                             //alert(response);							 
-                            }
-                         }
-  }); 
- });
- 
-///////////Проверка имени///////////////////////////////////////////
- $('#userLogin').keyup(function() {
-                  nameVal = $('#userLogin').val();
-                  $.ajax({
-                        url: "<?=$domain?>/modules/registration/check/name/",
-                        type: "POST",
-                        data: {"name": nameVal},
-                        cache: false,
-                        success: function(response){
-                            if(response == true){ 
-							 $(name).closest('div').find('div').html('данный ник уже зарегистрирован');
-							 login_tip = 0;
-                            }else{
-						     $(name).closest('div').find('div').html(' ');
-                             login_tip = 1;							 
-                            }
-                         }
-                   });   
- });
-///////////Проверка E-mail'а////////////////////////////////////////////////////////////
- $('#userEmail').keyup(function() {
-                  emailVal = $('#userEmail').val();
-				  //alert('<?=$domain?>/modules/registration/check/email/');
-                  $.ajax({
-                        url: "<?=$domain?>/modules/registration/check/email/",
-                        type: "POST",
-                        data: {"email": emailVal},
-                        cache: false,
-                        success: function(response){
-                            if(response == true){
-                             $(email).closest('div').find('div').html('данный e-mail уже зарегистрирован');                             
-							 email_tip = 0;
-							 //alert(email_tip);
-							}else{
-						     $(email).closest('div').find('div').html(' ');  		 		 
-                             email_tip = 1;
-							 //alert(response);
-							 //alert(email_tip);
-							}
-                         }
-                   }); 
- });
- 
- $('.login_form').mouseover(function() {
-	if(password_tip == 1 && email_tip == 1 && login_tip == 1 ){
-	  $('.login_form form button').removeAttr('disabled');
-      $('.login_form form button').css({"opacity":"1","cursor":"pointer"});	 
-	}else{
-	  $('.login_form form button').attr("disabled", true);
-	  $('.login_form form button').css({"opacity":"0.5","cursor":"default"});
-	}
- });
-});
-
-</script>
-<div style='text-align: center; margin-bottom: 50px;' class='content_tall'>
-<div id="reg_form" >
-	 <div class="login_form">
-	 <?if($logedUser->member_id() > 0){ ?>
-	   <span>Вы не можете зарегистрироваться пока не выйдете из сиситемы</span>
-     <? }else{ ?>
-	   <form action='../modules/registration/' method='POST'> 
-      <div>	 
-	   <span>Логин*</span>
-	   <input id='userLogin'  autocomplete='off' required name="title" type="text" placeholder="">
-	   <div></div>
-	  </div>
-	  <div>
-	   <span>E-mail*</span>
-	   <input id='userEmail' autocomplete='off' required name="email" type="email" placeholder="">
-	   <div></div>
-	  </div>
-	  <div>
-	   <span>Телефон</span>
-	   <input id='userPhone' required autocomplete='off'  name="phone"  type='tel' pattern='8[0-9]{10}' placeholder="">
-	   <div></div>
-	  </div>
-	  <div>
-	   <span>Пароль*</span>
-	   <input id='userPass' required   name="password" type="password" placeholder="">
-	   <div></div>
-	  </div>
-	  <div>
-	   <span>Повторите пароль*</span>  
-	   <input id='passCheck' required type="password" placeholder="">
-	   <div></div>
-	  </div>
-	  <div>
-	  <button class='button_active'>Зарегистрироваться</button>
-	  </div>
-	  <input type='checkbox'  required name='accept' value='1' /></input> <span>Я согласен с <a href='#' target='_blank'>условиями</a> обработки персональных данных</span>
-	 </form>
-     <? } ?>	 
-	  </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name='description' content=''>
+    <meta name='author' content=''>
+    <link rel='icon' href='<?=$domain?><?=$theme->metaIcon()?>'>
+    <link rel="stylesheet" type="text/css" href="<?=$domain?>css/<?=$theme->css()?>">
+    <title><?=$media_src['site_name']?> - Вход</title>
+</head>
+<body>
+<div class='login_container'>
+    <div class='login_form'>
+        <form action='<?=$domain?>auth/login/' method='POST'>
+            <div style='width: 100%; text-align: center;'>
+                <img style='max-width: 60px; margin: 0; ' src='/uploads/e3ba745b970b358935f16dd5f72415a1.png'/>
+            </div>
+            <span>Логин</span>
+            <input name='login' type='text' placeholder=''></input><br>
+            <span>Пароль</span>
+            <input name='pass' type='password' placeholder=''></input><br>
+            <? if(isset($_GET['wrong'])){ echo "<div class='login_error'>Неверный логин или пароль</div>";} ?>
+            <input type='submit' value='Войти'></input>
+        </form>
     </div>
 </div>
-<?
-include('../components/footer_menu.php');
-include('../components/footer.php');
 
-?>
+
+</body>
+</html>

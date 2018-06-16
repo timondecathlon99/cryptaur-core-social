@@ -50,10 +50,10 @@ function date_format_rus($date){
          }elseif($d.$m.$y == date('dmY', strtotime('-1 day'))){
 	      $text =  "Вчера в $tm";
          }else{
-	       $text =  $d.' '.$month_array[(int)($m)].' '.$y;
+	       $text =  $d.' '.$month_array[(int)($m)].' '.$y.' в '.$tm;
          }
   }else{
-		 $text =  $d.' '.$month_array[(int)($m)].' '.$y;
+		 $text =  $d.' '.$month_array[(int)($m)].' '.$y.' в '.$tm;
   }
 
   return $text; 
@@ -167,18 +167,7 @@ function createThumbnail($filename) {
   $path_to_image_directory = '../uploads/'; //Папка, куда будут загружаться полноразмерные изображения
   $path_to_thumbs_directory = '../uploads/';//Папка, куда будут загружаться миниатюры  
   
-  //echo "В функию передается файл: ".$path_to_image_directory . $filename;
-  
-  //$dick = $path_to_image_directory . $filename;
-  
-  //echo "Это картинка в функции: <img style='width : 300px;' src='$path_to_image_directory$filename' alt='$path_to_image_directory . $filename'/>";
-  /*
-  if(file_exists($dick)){
-	  echo 'hui';
-  }else{
-	 echo $dick.'  doesnt exist';  
-  }
-	*/  
+
   
   if(preg_match('/[.](jpg)$/', $filename)) {
   $im = imagecreatefromjpeg($path_to_image_directory . $filename);
@@ -200,20 +189,11 @@ function createThumbnail($filename) {
   $nm = imagecreatetruecolor($nx, $ny); //создаем новый холст с заданными параметрами
 
   imagecopyresized($nm, $im, 0,0,0,0,$nx,$ny,$ox,$oy); //переносим исходник на холст
-  /*
-  if(!file_exists($path_to_thumbs_directory)) {
-  if(!mkdir($path_to_thumbs_directory)) {
-  die("Возникли проблемы! попробуйте снова!");
-  } 
-  }
-  */
+
   if(imagejpeg($nm, $path_to_thumbs_directory .'thumb_'.$filename)){
 	 echo $path_to_thumbs_directory .'thumb_'.$filename;  
   }
-  
-  $tn = '<img src="' . $path_to_thumbs_directory . 'thumb_'.$filename . '" alt="image" />';
-  $tn .= '<br />Поздравляем! Ваше изображение успешно загружено и его миниатюра удачно выполнена. Выше Вы можете просмотреть результат:';
-  //echo $tn;
+
   }//Сжимаем изображение, если есть оишибки, то говорим о них, если их нет, то выводим получившуюся миниатюру
   
 ?>

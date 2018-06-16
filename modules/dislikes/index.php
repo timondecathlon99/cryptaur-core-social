@@ -10,8 +10,11 @@ function my_autoloader($class) {
 }
 spl_autoload_register('my_autoloader');
 
-$logedUser = new Member($_COOKIE['member_id']);
-$currRecord = new Record($_GET['record_id']);
-$currRecord->setDislike($logedUser->member_id());
+if($_GET['type'] == 'record'){
+    $dislikeItem = new Record($_GET['record_id']);
+}else{
+    $dislikeItem = new Comment($_GET['comment_id']);
+}
+$dislikeItem->setDislike();
 
 header("Location: ".$_SERVER['HTTP_REFERER']);
